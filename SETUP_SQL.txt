@@ -1,0 +1,28 @@
+create table if not exists profiles (
+  id uuid primary key,
+  display_name text not null
+);
+
+create table if not exists wishlist_items (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid not null,
+  title text not null,
+  description text,
+  product_url text,
+  image_url text,
+  price_cents integer,
+  priority integer default 0,
+  created_at timestamptz default now()
+);
+
+create table if not exists cart_items (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null,
+  wishlist_item_id uuid references wishlist_items(id) on delete cascade,
+  quantity integer not null default 1,
+  purchased boolean not null default false,
+  updated_at timestamptz default now()
+);
+
+create unique index if not exists cart_items_user_item_unique
+  on cart_items (user_id, wishlist_item_id);
