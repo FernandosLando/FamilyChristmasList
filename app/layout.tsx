@@ -2,30 +2,35 @@ import './globals.css';
 import React from 'react';
 
 export const metadata = {
-  title: 'Family Wishlist',
-  description: 'Shared wishlist + shopping cart for the whole family',
+  title: 'Zeller Family Christmas Lists',
+  description: 'A tiny bit extra… because it’s Christmas.',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
-      <body
-        style={{
-          fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
-          margin: 0,
-          background: 'radial-gradient(circle at top, #020617, #020617 40%, #000 100%)',
-          color: 'white',
-          minHeight: '100vh',
-        }}
-      >
-        {/* Full-width container instead of a narrow column */}
-        <div
-          style={{
-            width: '100%',
-            padding: '1.75rem 2rem 3rem',
-            boxSizing: 'border-box',
-          }}
-        >
+      <body className="holiday-body">
+        {/* Soft Apple-style gradient background + subtle radial lights */}
+        <div className="holiday-background">
+          <div className="holiday-gradient-layer" />
+          <div className="holiday-glow holiday-glow-1" />
+          <div className="holiday-glow holiday-glow-2" />
+          <div className="holiday-glow holiday-glow-3" />
+        </div>
+
+        {/* Subtle parallax overlay */}
+        <div className="holiday-parallax">
+          <div className="parallax-orb orb-1" />
+          <div className="parallax-orb orb-2" />
+          <div className="parallax-orb orb-3" />
+        </div>
+
+        {/* Main content container */}
+        <div className="page-shell">
           {children}
         </div>
       </body>
