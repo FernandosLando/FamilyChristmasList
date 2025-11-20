@@ -179,6 +179,10 @@ function parseProduct(html: string, baseUrl: string) {
       /"price"\s*:\s*([0-9]+\.[0-9]+)/i,
       /"customerPrice":\s*\{\s*"currentPrice":\s*\{\s*"value":\s*([0-9]+\.[0-9]+)/i,
       /"customerPrice":\s*\{\s*"currentPrice":\s*\{\s*"price":\s*([0-9]+\.[0-9]+)/i,
+      /"formattedSalePrice"\s*:\s*"\$?([0-9]+(?:\.[0-9]{2})?)"/i,
+      /"formattedPriceValue"\s*:\s*"\$?([0-9]+(?:\.[0-9]{2})?)"/i,
+      /"priceWithPlan":\s*\{\s*"price":\s*([0-9]+\.[0-9]+)/i,
+      /"priceAmount"\s*:\s*([0-9]+\.[0-9]+)/i,
     ];
     for (const re of bbRegexes) {
       const m = html.match(re);
@@ -192,7 +196,10 @@ function parseProduct(html: string, baseUrl: string) {
       const bbText =
         $('[data-testid="customer-price"]').text() ||
         $('.priceView-hero-price').text() ||
-        $('.priceView-customer-price .sr-only').text();
+        $('.priceView-hero-price span[aria-hidden="true"]').text() ||
+        $('.priceView-customer-price').text() ||
+        $('.priceView-customer-price .sr-only').text() ||
+        $('[itemprop="price"]').attr('content');
       price = cleanPrice(bbText);
     }
   }
