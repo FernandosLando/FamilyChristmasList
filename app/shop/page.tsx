@@ -628,8 +628,11 @@ export default function ShopPage() {
                           height: 68,
                           borderRadius: 18,
                           overflow: 'hidden',
-                          background: '#020617',
+                          background: '#0b1223',
                           flexShrink: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                         }}
                       >
                         {item.image_url ? (
@@ -639,7 +642,8 @@ export default function ShopPage() {
                             style={{
                               width: '100%',
                               height: '100%',
-                              objectFit: 'cover',
+                              objectFit: 'contain',
+                              background: '#0b1223',
                             }}
                           />
                         ) : (

@@ -10,6 +10,7 @@ body {
   padding: 0;
   margin: 0;
   height: 100%;
+  width: 100%;
 }
 
 body {
@@ -133,6 +134,7 @@ body {
   display: flex;
   justify-content: center;
   padding: 1.25rem;
+  box-sizing: border-box;
 }
 
 @media (min-width: 768px) {

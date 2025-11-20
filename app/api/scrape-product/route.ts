@@ -104,6 +104,11 @@ function parseProduct(html: string, baseUrl: string) {
       const hiResMatch = html.match(/"hiRes"\s*:\s*"([^"]+)"/);
       if (hiResMatch?.[1]) imageUrl = hiResMatch[1];
     }
+
+    if (!imageUrl) {
+      const largeMatch = html.match(/"large"\s*:\s*"([^"]+)"/);
+      if (largeMatch?.[1]) imageUrl = largeMatch[1];
+    }
   }
 
   if (!imageUrl) {
@@ -158,6 +163,30 @@ function parseProduct(html: string, baseUrl: string) {
           if (price != null) break;
         }
       }
+    }
+  }
+
+  // Best Buy: try JSON fragments (salePrice/regularPrice) and price blocks.
+  if (price == null && hostname.includes('bestbuy.')) {
+    const bbRegexes = [
+      /"salePrice"\s*:\s*([0-9]+\.[0-9]+)/i,
+      /"regularPrice"\s*:\s*([0-9]+\.[0-9]+)/i,
+      /"price"\s*:\s*([0-9]+\.[0-9]+)/i,
+    ];
+    for (const re of bbRegexes) {
+      const m = html.match(re);
+      if (m?.[1]) {
+        price = cleanPrice(m[1]);
+        if (price != null) break;
+      }
+    }
+
+    if (price == null) {
+      const bbText =
+        $('[data-testid="customer-price"]').text() ||
+        $('.priceView-hero-price').text() ||
+        $('.priceView-customer-price .sr-only').text();
+      price = cleanPrice(bbText);
     }
   }
 
