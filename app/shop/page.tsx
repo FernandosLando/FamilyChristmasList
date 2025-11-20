@@ -303,7 +303,7 @@ export default function ShopPage() {
     <main
       style={{
         minHeight: '100vh',
-        padding: '1.25rem 1rem 1.75rem',
+        padding: '1.5rem 1rem 1.75rem',
         color: 'white',
         width: '100%',
       }}
@@ -338,9 +338,9 @@ export default function ShopPage() {
           <div style={{ flex: 1, minWidth: 220 }}>
             <h1
               style={{
-                fontSize: 'clamp(1.5rem, 4vw + 0.4rem, 1.7rem)',
-                margin: '0 0 2px',
-                lineHeight: 1.2,
+                fontSize: 'clamp(1.55rem, 3vw + 0.7rem, 2rem)',
+                margin: '0 0 4px',
+                lineHeight: 1.15,
               }}
             >
               Zeller Family Christmas Lists 🎄
@@ -373,7 +373,7 @@ export default function ShopPage() {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 10,
+              gap: 12,
               alignItems: 'flex-end',
               minWidth: 220,
             }}
@@ -581,7 +581,7 @@ export default function ShopPage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
             gap: 16,
             width: '100%',
             boxSizing: 'border-box',
@@ -774,10 +774,10 @@ export default function ShopPage() {
                           gap: 6,
                           alignItems: 'flex-end',
                           flexShrink: 0,
-                          width: '100%',
-                          minWidth: 0,
-                          maxWidth: 220,
-                          alignSelf: 'stretch',
+                          width: 'clamp(140px, 45%, 190px)',
+                          minWidth: 140,
+                          maxWidth: 200,
+                          alignSelf: 'flex-start',
                         }}
                       >
                         <button
