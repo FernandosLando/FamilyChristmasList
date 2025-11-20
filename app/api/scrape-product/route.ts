@@ -235,6 +235,11 @@ function parseProduct(html: string, baseUrl: string) {
     }
   }
 
+  // Normalize final price to two decimal places if present.
+  if (price != null) {
+    price = Math.round(price * 100) / 100;
+  }
+
   const extractPriceFromObject = (obj: any): number | null => {
     if (!obj || typeof obj !== 'object') return null;
 

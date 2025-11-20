@@ -570,6 +570,8 @@ export default function ShopPage() {
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
             gap: 16,
+            width: '100%',
+            boxSizing: 'border-box',
           }}
         >
           {/* Wishlist column */}
@@ -809,6 +811,7 @@ export default function ShopPage() {
               background: 'rgba(15,23,42,0.96)',
               border: '1px solid rgba(148,163,184,0.5)',
               boxShadow: '0 24px 60px rgba(15,23,42,0.9)',
+              minWidth: 0,
             }}
           >
             <div
@@ -890,27 +893,28 @@ export default function ShopPage() {
                           ? (item.price_cents / 100).toFixed(2)
                           : null;
 
-                      return (
-                        <div
-                          key={row.id}
-                          className="click-card"
-                          style={{
+                  return (
+                    <div
+                      key={row.id}
+                      className="click-card"
+                      style={{
                             borderRadius: 16,
                             padding: '0.6rem 0.75rem',
-                            border: '1px solid rgba(148,163,184,0.45)',
-                            background: 'rgba(15,23,42,0.98)',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            gap: 8,
-                            alignItems: 'center',
-                          }}
-                        >
-                          <div style={{ minWidth: 0 }}>
-                            <div
-                              style={{
-                                fontSize: 13,
-                                fontWeight: 600,
-                                whiteSpace: 'nowrap',
+                        border: '1px solid rgba(148,163,184,0.45)',
+                        background: 'rgba(15,23,42,0.98)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        gap: 10,
+                        alignItems: 'center',
+                        minWidth: 0,
+                      }}
+                    >
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 600,
+                            whiteSpace: 'nowrap',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
                               }}
@@ -933,16 +937,17 @@ export default function ShopPage() {
                               {!funMode && price && ` · $${price} each`}
                             </div>
                           </div>
-                          <div
-                            style={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              gap: 4,
-                              alignItems: 'flex-end',
-                              flexShrink: 0,
-                              width: 130,
-                            }}
-                          >
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 4,
+                            alignItems: 'flex-end',
+                            flexShrink: 0,
+                            width: 130,
+                            minWidth: 130,
+                          }}
+                        >
                             <button
                               type="button"
                               onClick={() => handleMoveToBought(row.id)}
@@ -1060,11 +1065,12 @@ export default function ShopPage() {
                             background: 'rgba(15,23,42,0.98)',
                             display: 'flex',
                             justifyContent: 'space-between',
-                            gap: 8,
+                            gap: 10,
                             alignItems: 'center',
+                            minWidth: 0,
                           }}
                         >
-                          <div style={{ minWidth: 0 }}>
+                          <div style={{ minWidth: 0, flex: 1 }}>
                             <div
                               style={{
                                 fontSize: 13,
