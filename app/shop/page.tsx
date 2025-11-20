@@ -303,9 +303,9 @@ export default function ShopPage() {
     <main
       style={{
         minHeight: '100vh',
-        padding: '1.5rem',
-        background: '#020617',
+        padding: '1.5rem 1rem 2rem',
         color: 'white',
+        width: '100%',
       }}
     >
       <motion.div
@@ -314,8 +314,14 @@ export default function ShopPage() {
         transition={{ duration: 0.4 }}
         style={{
           width: '100%',
-          maxWidth: 1200,
+          maxWidth: 1100,
           margin: '0 auto',
+          borderRadius: 32,
+          padding: '1.75rem 1.5rem',
+          background:
+            'radial-gradient(circle at top left, rgba(56,189,248,0.16), rgba(15,23,42,0.96))',
+          border: '1px solid rgba(148,163,184,0.6)',
+          boxShadow: '0 30px 80px rgba(15,23,42,0.95)',
         }}
       >
         {/* Header row */}
@@ -329,7 +335,7 @@ export default function ShopPage() {
             flexWrap: 'wrap',
           }}
         >
-          <div style={{ flex: 1, minWidth: 260 }}>
+          <div style={{ flex: 1, minWidth: 220 }}>
             <h1 style={{ fontSize: '1.7rem', margin: 0 }}>
               Zeller Family Christmas Lists 🎄
             </h1>
@@ -363,7 +369,7 @@ export default function ShopPage() {
               flexDirection: 'column',
               gap: 10,
               alignItems: 'flex-end',
-              minWidth: 260,
+              minWidth: 220,
             }}
           >
             <div style={{ display: 'flex', gap: 8 }}>
@@ -562,7 +568,7 @@ export default function ShopPage() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1.6fr) minmax(0, 1fr)',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
             gap: 16,
           }}
         >

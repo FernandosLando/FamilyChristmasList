@@ -38,6 +38,13 @@ async function fetchWithTimeout(
 
 function parseProduct(html: string, baseUrl: string) {
   const $ = load(html);
+  const hostname = (() => {
+    try {
+      return new URL(baseUrl).hostname.toLowerCase();
+    } catch {
+      return '';
+    }
+  })();
 
   const resolveUrl = (input: string | null | undefined): string | null => {
     if (!input) return null;
@@ -71,6 +78,29 @@ function parseProduct(html: string, baseUrl: string) {
     $('meta[name="twitter:image"]').attr('content') ||
     null;
 
+  // Amazon places the real image in data-a-dynamic-image / data-old-hires.
+  if (!imageUrl && hostname.includes('amazon.')) {
+    const amazonImageData =
+      $('#imgTagWrapperId img').attr('data-a-dynamic-image') ||
+      $('#landingImage').attr('data-a-dynamic-image');
+    if (amazonImageData) {
+      try {
+        const parsed = JSON.parse(amazonImageData);
+        const firstKey = Object.keys(parsed)[0];
+        if (firstKey) imageUrl = firstKey;
+      } catch {
+        //
+      }
+    }
+
+    if (!imageUrl) {
+      const amazonHiRes =
+        $('#imgTagWrapperId img').attr('data-old-hires') ||
+        $('#landingImage').attr('data-old-hires');
+      if (amazonHiRes) imageUrl = amazonHiRes;
+    }
+  }
+
   if (!imageUrl) {
     const candidateImg = $('img[src]')
       .filter((_, el) => {
@@ -89,6 +119,15 @@ function parseProduct(html: string, baseUrl: string) {
 
   // ---------- PRICE ----------
   let price: number | null = null;
+
+  // Common meta price tags
+  if (price == null) {
+    const metaPrice =
+      $('meta[property="product:price:amount"]').attr('content') ||
+      $('meta[property="og:price:amount"]').attr('content') ||
+      $('meta[name="twitter:data1"]').attr('content');
+    price = cleanPrice(metaPrice);
+  }
 
   const extractPriceFromObject = (obj: any): number | null => {
     if (!obj || typeof obj !== 'object') return null;
@@ -159,6 +198,17 @@ function parseProduct(html: string, baseUrl: string) {
       console.warn('JSON-LD parse failed, skipping block', err);
     }
   });
+
+  if (price == null) {
+    if (hostname.includes('amazon.')) {
+      const amazonPrice =
+        $('#priceblock_ourprice').text() ||
+        $('#priceblock_dealprice').text() ||
+        $('#priceblock_saleprice').text() ||
+        $('.a-price .a-offscreen').first().text();
+      price = cleanPrice(amazonPrice);
+    }
+  }
 
   if (price == null) {
     // Microdata fallback (itemprop="price")
