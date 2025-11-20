@@ -4,8 +4,8 @@ import { load } from 'cheerio';
 export const dynamic = 'force-dynamic';
 
 const SCRAPER_API_KEY = process.env.SCRAPER_API_KEY;
-// Single render fetch (no best-effort direct) for consistent output.
-const RENDER_TIMEOUT = 12000;
+const DIRECT_TIMEOUT = 4500;
+const RENDER_TIMEOUT = 9000;
 
 // Normalize a price string (like "$29.99" or "29,99") to a number.
 function cleanPrice(input: string | null | undefined): number | null {
@@ -157,6 +157,9 @@ function parseProduct(html: string, baseUrl: string) {
         /"apexPriceToPay":\{"amount":"([^"]+)"/,
         /"rawPrice":"([^"]+)"/,
         /"displayPrice"\s*:\s*"([^"]+)"/,
+        /"priceAmount"\s*:\s*"([^"]+)"/,
+        /"amount"\s*:\s*"([^"]+)"\s*,\s*"currencySymbol"/,
+        /"price"\s*:\s*\{\s*"value"\s*:\s*([0-9]+\.[0-9]+)/,
       ];
       for (const re of priceMatches) {
         const m = html.match(re);
@@ -174,6 +177,8 @@ function parseProduct(html: string, baseUrl: string) {
       /"salePrice"\s*:\s*([0-9]+\.[0-9]+)/i,
       /"regularPrice"\s*:\s*([0-9]+\.[0-9]+)/i,
       /"price"\s*:\s*([0-9]+\.[0-9]+)/i,
+      /"customerPrice":\s*\{\s*"currentPrice":\s*\{\s*"value":\s*([0-9]+\.[0-9]+)/i,
+      /"customerPrice":\s*\{\s*"currentPrice":\s*\{\s*"price":\s*([0-9]+\.[0-9]+)/i,
     ];
     for (const re of bbRegexes) {
       const m = html.match(re);
@@ -317,44 +322,59 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid url' }, { status: 400 });
     }
 
-    if (!SCRAPER_API_KEY) {
-      console.error('SCRAPER_API_KEY is not set');
-      return NextResponse.json(
-        { error: 'Server not configured for scraping' },
-        { status: 500 }
-      );
-    }
-
     const commonHeaders = {
       'User-Agent':
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
       'Accept-Language': 'en-US,en;q=0.9',
+      Accept:
+        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
     };
 
-    const scraperUrl = `https://api.scraperapi.com/?api_key=${encodeURIComponent(
-      SCRAPER_API_KEY
-    )}&render=true&url=${encodeURIComponent(url)}`;
-
     let html: string | null = null;
+    let sourceUsed: 'direct' | 'scraper' | null = null;
+
+    // Try direct fetch first for speed and to let redirects (like a.co) resolve early.
     try {
-      const scraperResp = await fetchWithTimeout(
-        scraperUrl,
-        {
-          headers: commonHeaders,
-          cache: 'no-store',
-        },
-        RENDER_TIMEOUT
+      const directResp = await fetchWithTimeout(
+        url,
+        { headers: commonHeaders, redirect: 'follow', cache: 'no-store' },
+        DIRECT_TIMEOUT
       );
-      if (scraperResp.ok) {
-        const text = await scraperResp.text();
+      if (directResp.ok) {
+        const text = await directResp.text();
         if (text && text.length > 500) {
           html = text;
+          sourceUsed = 'direct';
         }
-      } else {
-        console.error('ScraperAPI error status:', scraperResp.status);
       }
     } catch (err) {
-      console.error('ScraperAPI request failed:', err);
+      console.warn('Direct fetch failed, will try render:', err);
+    }
+
+    // Rendered fetch via ScraperAPI as fallback for JS-heavy pages.
+    if ((!html || html.length < 500) && SCRAPER_API_KEY) {
+      const scraperUrl = `https://api.scraperapi.com/?api_key=${encodeURIComponent(
+        SCRAPER_API_KEY
+      )}&render=true&url=${encodeURIComponent(url)}`;
+
+      try {
+        const scraperResp = await fetchWithTimeout(
+          scraperUrl,
+          { headers: commonHeaders, cache: 'no-store' },
+          RENDER_TIMEOUT
+        );
+        if (scraperResp.ok) {
+          const text = await scraperResp.text();
+          if (text && text.length > 500) {
+            html = text;
+            sourceUsed = 'scraper';
+          }
+        } else {
+          console.error('ScraperAPI error status:', scraperResp.status);
+        }
+      } catch (err) {
+        console.error('ScraperAPI request failed:', err);
+      }
     }
 
     if (!html) {
@@ -365,10 +385,7 @@ export async function POST(req: NextRequest) {
     }
 
     const parsed = parseProduct(html, url);
-    return NextResponse.json({
-      ...parsed,
-      source: 'scraper',
-    });
+    return NextResponse.json({ ...parsed, source: sourceUsed });
   } catch (err) {
     console.error('Unexpected scrape error:', err);
     return NextResponse.json(
