@@ -170,6 +170,7 @@ export default function ProfilePage() {
     border: '1px solid rgba(148,163,184,0.5)',
     background: isLight ? 'rgba(255,255,255,0.97)' : 'rgba(15,23,42,0.96)',
     backdropFilter: 'blur(20px)',
+    minWidth: 0,
   } as const;
 
   const inputStyle = {
@@ -196,7 +197,7 @@ export default function ProfilePage() {
     <main
       style={{
         minHeight: '100vh',
-        padding: '1.5rem',
+        padding: '1.25rem 1rem 1.75rem',
       }}
     >
       <motion.div
@@ -267,7 +268,7 @@ export default function ProfilePage() {
           style={{
             display: 'grid',
             gap: 16,
-            gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr)',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
           }}
         >
           {/* Left column */}

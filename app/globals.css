@@ -13,6 +13,13 @@ body {
   width: 100%;
 }
 
+/* Mobile tweaks: ensure full-width layouts don't overflow */
+@media (max-width: 640px) {
+  .page-shell {
+    padding: 1rem;
+  }
+}
+
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text',
     'SF Pro Display', sans-serif;

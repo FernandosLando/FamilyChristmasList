@@ -196,7 +196,7 @@ export default function AdminPage() {
     <main
       style={{
         minHeight: '100vh',
-        padding: '1.5rem',
+        padding: '1.25rem 1rem 1.75rem',
       }}
     >
       <motion.div
@@ -221,6 +221,7 @@ export default function AdminPage() {
             gap: 16,
             alignItems: 'center',
             marginBottom: 16,
+            flexWrap: 'wrap',
           }}
         >
           <div>
