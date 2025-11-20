@@ -207,6 +207,13 @@ function parseProduct(html: string, baseUrl: string) {
     ];
     bbTextFields.forEach(pushCandidate);
 
+    // As a last resort, grab all $xx.xx patterns and pick the highest.
+    const dollarRegex = /\$\s*([0-9]{1,4}(?:,[0-9]{3})?(?:\.[0-9]{2})?)/g;
+    let mDollar;
+    while ((mDollar = dollarRegex.exec(html)) !== null) {
+      pushCandidate(mDollar[1]);
+    }
+
     if (candidates.length > 0) {
       price = Math.max(...candidates);
     }
