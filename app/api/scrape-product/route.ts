@@ -179,53 +179,58 @@ function parseProduct(html: string, baseUrl: string) {
       if (p != null) candidates.push(p);
     };
 
-    const bbRegexes = [
-      /"salePrice"\s*:\s*([0-9]+(?:\.[0-9]+)?)/gi,
-      /"regularPrice"\s*:\s*([0-9]+(?:\.[0-9]+)?)/gi,
-      /"price"\s*:\s*([0-9]+(?:\.[0-9]+)?)/gi,
-      /"customerPrice":\s*\{\s*"currentPrice":\s*\{\s*"value":\s*([0-9]+(?:\.[0-9]+)?)/gi,
-      /"customerPrice":\s*\{\s*"currentPrice":\s*\{\s*"price":\s*([0-9]+(?:\.[0-9]+)?)/gi,
-      /"formattedSalePrice"\s*:\s*"\$?([0-9]+(?:\.[0-9]{2})?)"/gi,
-      /"formattedPriceValue"\s*:\s*"\$?([0-9]+(?:\.[0-9]{2})?)"/gi,
-      /"priceWithPlan":\s*\{\s*"price":\s*([0-9]+(?:\.[0-9]+)?)/gi,
-      /"priceAmount"\s*:\s*([0-9]+(?:\.[0-9]+)?)/gi,
-    ];
-    for (const re of bbRegexes) {
-      let m;
-      while ((m = re.exec(html)) !== null) {
-        pushCandidate(m[1]);
-      }
-    }
-
-    const bbTextFields = [
+    // Priority selectors (try these first and stop if we get a sane price).
+    const bbPriorityFields = [
       $('[data-testid="customer-price"]').text(),
       $('.priceView-hero-price').text(),
       $('.priceView-hero-price span[aria-hidden="true"]').text(),
       $('.priceView-customer-price').text(),
       $('.priceView-customer-price .sr-only').text(),
       $('[itemprop="price"]').attr('content'),
-      // New Best Buy design price spans
       $('.text-style-body-md-400').text(),
       $('span.font-sans.text-default.text-style-body-md-400').text(),
     ];
-    bbTextFields.forEach(pushCandidate);
-
-    // As a last resort, grab all $xx.xx patterns and pick the highest.
-    const dollarRegex = /\$\s*([0-9]{1,4}(?:,[0-9]{3})?(?:\.[0-9]{2})?)/g;
-    let mDollar;
-    while ((mDollar = dollarRegex.exec(html)) !== null) {
-      pushCandidate(mDollar[1]);
+    for (const val of bbPriorityFields) {
+      const p = cleanPrice(val);
+      if (p != null && p >= 10) {
+        price = p;
+        break;
+      }
     }
 
-    if (candidates.length > 0) {
-      price = Math.max(...candidates);
-    }
+    // If no priority hit, gather all hints and pick the most reasonable.
+    if (price == null) {
+      const bbRegexes = [
+        /"salePrice"\s*:\s*([0-9]+(?:\.[0-9]+)?)/gi,
+        /"regularPrice"\s*:\s*([0-9]+(?:\.[0-9]+)?)/gi,
+        /"price"\s*:\s*([0-9]+(?:\.[0-9]+)?)/gi,
+        /"customerPrice":\s*\{\s*"currentPrice":\s*\{\s*"value":\s*([0-9]+(?:\.[0-9]+)?)/gi,
+        /"customerPrice":\s*\{\s*"currentPrice":\s*\{\s*"price":\s*([0-9]+(?:\.[0-9]+)?)/gi,
+        /"formattedSalePrice"\s*:\s*"\$?([0-9]+(?:\.[0-9]{2})?)"/gi,
+        /"formattedPriceValue"\s*:\s*"\$?([0-9]+(?:\.[0-9]{2})?)"/gi,
+        /"priceWithPlan":\s*\{\s*"price":\s*([0-9]+(?:\.[0-9]+)?)/gi,
+        /"priceAmount"\s*:\s*([0-9]+(?:\.[0-9]+)?)/gi,
+      ];
+      for (const re of bbRegexes) {
+        let m;
+        while ((m = re.exec(html)) !== null) {
+          pushCandidate(m[1]);
+        }
+      }
 
-    // If JSON-LD earlier picked a lower value (e.g., $9.99 plan), prefer the highest we see.
-    if (candidates.length > 0) {
-      const maxCandidate = Math.max(...candidates);
-      if (price == null || maxCandidate > price) {
-        price = maxCandidate;
+      // $xx.xx patterns
+      const dollarRegex = /\$\s*([0-9]{1,4}(?:,[0-9]{3})?(?:\.[0-9]{2})?)/g;
+      let mDollar;
+      while ((mDollar = dollarRegex.exec(html)) !== null) {
+        pushCandidate(mDollar[1]);
+      }
+
+      const filtered = candidates.filter((c) => c >= 10);
+      if (filtered.length > 0) {
+        // Choose the lowest "sane" price to avoid competitor/plan highs.
+        price = Math.min(...filtered);
+      } else if (candidates.length > 0) {
+        price = Math.min(...candidates);
       }
     }
   }
