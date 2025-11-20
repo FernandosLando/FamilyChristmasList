@@ -180,15 +180,15 @@ function parseProduct(html: string, baseUrl: string) {
     };
 
     const bbRegexes = [
-      /"salePrice"\s*:\s*([0-9]+\.[0-9]+)/gi,
-      /"regularPrice"\s*:\s*([0-9]+\.[0-9]+)/gi,
-      /"price"\s*:\s*([0-9]+\.[0-9]+)/gi,
-      /"customerPrice":\s*\{\s*"currentPrice":\s*\{\s*"value":\s*([0-9]+\.[0-9]+)/gi,
-      /"customerPrice":\s*\{\s*"currentPrice":\s*\{\s*"price":\s*([0-9]+\.[0-9]+)/gi,
+      /"salePrice"\s*:\s*([0-9]+(?:\.[0-9]+)?)/gi,
+      /"regularPrice"\s*:\s*([0-9]+(?:\.[0-9]+)?)/gi,
+      /"price"\s*:\s*([0-9]+(?:\.[0-9]+)?)/gi,
+      /"customerPrice":\s*\{\s*"currentPrice":\s*\{\s*"value":\s*([0-9]+(?:\.[0-9]+)?)/gi,
+      /"customerPrice":\s*\{\s*"currentPrice":\s*\{\s*"price":\s*([0-9]+(?:\.[0-9]+)?)/gi,
       /"formattedSalePrice"\s*:\s*"\$?([0-9]+(?:\.[0-9]{2})?)"/gi,
       /"formattedPriceValue"\s*:\s*"\$?([0-9]+(?:\.[0-9]{2})?)"/gi,
-      /"priceWithPlan":\s*\{\s*"price":\s*([0-9]+\.[0-9]+)/gi,
-      /"priceAmount"\s*:\s*([0-9]+\.[0-9]+)/gi,
+      /"priceWithPlan":\s*\{\s*"price":\s*([0-9]+(?:\.[0-9]+)?)/gi,
+      /"priceAmount"\s*:\s*([0-9]+(?:\.[0-9]+)?)/gi,
     ];
     for (const re of bbRegexes) {
       let m;
@@ -209,6 +209,14 @@ function parseProduct(html: string, baseUrl: string) {
 
     if (candidates.length > 0) {
       price = Math.max(...candidates);
+    }
+
+    // If JSON-LD earlier picked a lower value (e.g., $9.99 plan), prefer the highest we see.
+    if (candidates.length > 0) {
+      const maxCandidate = Math.max(...candidates);
+      if (price == null || maxCandidate > price) {
+        price = maxCandidate;
+      }
     }
   }
 
