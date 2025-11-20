@@ -20,8 +20,10 @@ body {
 /* ===== HOLIDAY BACKGROUND ===== */
 .holiday-body {
   min-height: 100vh;
-  background: #fdf9f5;
-  color: #111827;
+  background: radial-gradient(circle at 18% 20%, rgba(80, 140, 255, 0.16), transparent 38%),
+    radial-gradient(circle at 82% 78%, rgba(45, 212, 191, 0.12), transparent 42%),
+    linear-gradient(140deg, #030617 0%, #071024 32%, #0c1a33 70%, #0d213f 100%);
+  color: #e5e7eb;
   position: relative;
   overflow-x: hidden;
 }
@@ -31,9 +33,9 @@ body {
   position: fixed;
   inset: 0;
   z-index: -3;
-  background: radial-gradient(circle at top left, #ffe4e6 0, transparent 55%),
-    radial-gradient(circle at bottom right, #fef3c7 0, transparent 55%),
-    linear-gradient(135deg, #fdf9f5 0, #fefce8 35%, #fff7ed 70%, #fdf2f8 100%);
+  background: radial-gradient(circle at 12% 18%, rgba(94, 234, 212, 0.14), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(147, 197, 253, 0.18), transparent 48%),
+    linear-gradient(150deg, #020617 0%, #061022 35%, #0a1832 65%, #0c1f40 100%);
 }
 
 /* Soft glows like Apple holiday lighting */
@@ -41,16 +43,16 @@ body {
   position: absolute;
   inset: 0;
   background: radial-gradient(
-      circle at 20% 10%,
-      rgba(248, 113, 113, 0.25),
-      transparent 55%
+      circle at 18% 12%,
+      rgba(59, 130, 246, 0.22),
+      transparent 60%
     ),
     radial-gradient(
-      circle at 80% 90%,
-      rgba(250, 204, 21, 0.25),
-      transparent 55%
+      circle at 82% 88%,
+      rgba(56, 189, 248, 0.18),
+      transparent 60%
     );
-  opacity: 0.9;
+  opacity: 1;
 }
 
 .holiday-glow {
@@ -65,7 +67,7 @@ body {
   height: 320px;
   top: 10%;
   left: 8%;
-  background: rgba(248, 113, 113, 0.25);
+  background: rgba(59, 130, 246, 0.2);
 }
 
 .holiday-glow-2 {
@@ -73,7 +75,7 @@ body {
   height: 280px;
   bottom: 12%;
   right: 10%;
-  background: rgba(250, 204, 21, 0.2);
+  background: rgba(34, 211, 238, 0.16);
 }
 
 .holiday-glow-3 {
@@ -81,7 +83,7 @@ body {
   height: 240px;
   top: 45%;
   left: 55%;
-  background: rgba(190, 242, 100, 0.2);
+  background: rgba(94, 234, 212, 0.14);
 }
 
 /* Parallax bokeh orbs (subtle) */
@@ -105,6 +107,7 @@ body {
   height: 130px;
   top: 15%;
   right: 20%;
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.75), transparent);
 }
 
 .orb-2 {
@@ -112,6 +115,7 @@ body {
   height: 100px;
   bottom: 20%;
   left: 18%;
+  background: radial-gradient(circle, rgba(45, 212, 191, 0.7), transparent);
 }
 
 .orb-3 {
@@ -119,6 +123,7 @@ body {
   height: 150px;
   top: 55%;
   right: 35%;
+  background: radial-gradient(circle, rgba(125, 211, 252, 0.65), transparent);
 }
 
 /* ===== PAGE SHELL (NO BLACK BOXES) ===== */
@@ -431,5 +436,5 @@ select {
 
 /* prevent black bars on very tall or zoomed layouts */
 html {
-  background: #fdf9f5;
+  background: #030617;
 }
