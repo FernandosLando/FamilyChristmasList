@@ -640,6 +640,7 @@ export default function ShopPage() {
                         alignItems: 'stretch',
                         background: 'rgba(15,23,42,0.98)',
                         minWidth: 0,
+                        flexWrap: 'wrap',
                       }}
                     >
                       <div
@@ -689,7 +690,7 @@ export default function ShopPage() {
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'flex-start',
-                            gap: 10,
+                            gap: 8,
                             flexWrap: 'wrap',
                           }}
                         >
@@ -774,10 +775,14 @@ export default function ShopPage() {
                           gap: 6,
                           alignItems: 'flex-end',
                           flexShrink: 0,
-                          width: 'clamp(140px, 45%, 190px)',
-                          minWidth: 140,
-                          maxWidth: 200,
-                          alignSelf: 'flex-start',
+                          width: '100%',
+                          minWidth: 0,
+                          maxWidth: 240,
+                          alignSelf: 'stretch',
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                          justifyContent: 'flex-end',
+                          gap: 8,
                         }}
                       >
                         <button
@@ -787,7 +792,7 @@ export default function ShopPage() {
                           }
                           style={{
                             borderRadius: 999,
-                            padding: '0.3rem 0.7rem',
+                            padding: '0.35rem 0.75rem',
                             border: '1px solid rgba(148,163,184,0.7)',
                             background: 'transparent',
                             color: '#e5e7eb',
@@ -805,7 +810,7 @@ export default function ShopPage() {
                           disabled={isBought}
                           style={{
                             borderRadius: 999,
-                            padding: '0.35rem 0.7rem',
+                            padding: '0.4rem 0.9rem',
                             border: 'none',
                             cursor: isBought ? 'default' : 'pointer',
                             background: isBought
