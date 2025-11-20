@@ -4,7 +4,8 @@ import { load } from 'cheerio';
 export const dynamic = 'force-dynamic';
 
 const SCRAPER_API_KEY = process.env.SCRAPER_API_KEY;
-const DEFAULT_TIMEOUT = 15000; // Hard stop to prevent hanging in Vercel
+// Single render fetch (no best-effort direct) for consistent output.
+const RENDER_TIMEOUT = 12000;
 
 // Normalize a price string (like "$29.99" or "29,99") to a number.
 function cleanPrice(input: string | null | undefined): number | null {
@@ -25,7 +26,7 @@ function cleanPrice(input: string | null | undefined): number | null {
 async function fetchWithTimeout(
   targetUrl: string,
   options: RequestInit = {},
-  timeoutMs: number = DEFAULT_TIMEOUT
+  timeoutMs: number
 ) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -153,6 +154,7 @@ function parseProduct(html: string, baseUrl: string) {
     if (price == null) {
       const priceMatches = [
         /"priceToPay":\{"rawPrice":"([^"]+)"/,
+        /"apexPriceToPay":\{"amount":"([^"]+)"/,
         /"rawPrice":"([^"]+)"/,
         /"displayPrice"\s*:\s*"([^"]+)"/,
       ];
@@ -315,52 +317,44 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid url' }, { status: 400 });
     }
 
+    if (!SCRAPER_API_KEY) {
+      console.error('SCRAPER_API_KEY is not set');
+      return NextResponse.json(
+        { error: 'Server not configured for scraping' },
+        { status: 500 }
+      );
+    }
+
     const commonHeaders = {
       'User-Agent':
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
       'Accept-Language': 'en-US,en;q=0.9',
     };
 
+    const scraperUrl = `https://api.scraperapi.com/?api_key=${encodeURIComponent(
+      SCRAPER_API_KEY
+    )}&render=true&url=${encodeURIComponent(url)}`;
+
     let html: string | null = null;
-    let sourceUsed: 'direct' | 'scraper' | null = null;
-
-    // Try direct fetch first (fastest for many sites).
     try {
-      const directResp = await fetchWithTimeout(url, {
-        headers: commonHeaders,
-        redirect: 'follow',
-        cache: 'no-store',
-      });
-      if (directResp.ok) {
-        html = await directResp.text();
-        sourceUsed = 'direct';
-      } else {
-        console.warn('Direct fetch failed status:', directResp.status);
-      }
-    } catch (err) {
-      console.warn('Direct fetch errored, will try ScraperAPI if available:', err);
-    }
-
-    // Fallback to ScraperAPI for stubborn or JS-heavy sites.
-    if ((!html || html.length < 500) && SCRAPER_API_KEY) {
-      const scraperUrl = `https://api.scraperapi.com/?api_key=${encodeURIComponent(
-        SCRAPER_API_KEY
-      )}&render=true&url=${encodeURIComponent(url)}`;
-
-      try {
-        const scraperResp = await fetchWithTimeout(scraperUrl, {
+      const scraperResp = await fetchWithTimeout(
+        scraperUrl,
+        {
           headers: commonHeaders,
           cache: 'no-store',
-        });
-        if (scraperResp.ok) {
-          html = await scraperResp.text();
-          sourceUsed = 'scraper';
-        } else {
-          console.error('ScraperAPI error status:', scraperResp.status);
+        },
+        RENDER_TIMEOUT
+      );
+      if (scraperResp.ok) {
+        const text = await scraperResp.text();
+        if (text && text.length > 500) {
+          html = text;
         }
-      } catch (err) {
-        console.error('ScraperAPI request failed:', err);
+      } else {
+        console.error('ScraperAPI error status:', scraperResp.status);
       }
+    } catch (err) {
+      console.error('ScraperAPI request failed:', err);
     }
 
     if (!html) {
@@ -373,7 +367,7 @@ export async function POST(req: NextRequest) {
     const parsed = parseProduct(html, url);
     return NextResponse.json({
       ...parsed,
-      source: sourceUsed,
+      source: 'scraper',
     });
   } catch (err) {
     console.error('Unexpected scrape error:', err);
