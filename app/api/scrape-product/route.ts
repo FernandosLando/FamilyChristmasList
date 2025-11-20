@@ -173,34 +173,42 @@ function parseProduct(html: string, baseUrl: string) {
 
   // Best Buy: try JSON fragments (salePrice/regularPrice) and price blocks.
   if (price == null && hostname.includes('bestbuy.')) {
+    const candidates: number[] = [];
+    const pushCandidate = (val: string | null | undefined) => {
+      const p = cleanPrice(val);
+      if (p != null) candidates.push(p);
+    };
+
     const bbRegexes = [
-      /"salePrice"\s*:\s*([0-9]+\.[0-9]+)/i,
-      /"regularPrice"\s*:\s*([0-9]+\.[0-9]+)/i,
-      /"price"\s*:\s*([0-9]+\.[0-9]+)/i,
-      /"customerPrice":\s*\{\s*"currentPrice":\s*\{\s*"value":\s*([0-9]+\.[0-9]+)/i,
-      /"customerPrice":\s*\{\s*"currentPrice":\s*\{\s*"price":\s*([0-9]+\.[0-9]+)/i,
-      /"formattedSalePrice"\s*:\s*"\$?([0-9]+(?:\.[0-9]{2})?)"/i,
-      /"formattedPriceValue"\s*:\s*"\$?([0-9]+(?:\.[0-9]{2})?)"/i,
-      /"priceWithPlan":\s*\{\s*"price":\s*([0-9]+\.[0-9]+)/i,
-      /"priceAmount"\s*:\s*([0-9]+\.[0-9]+)/i,
+      /"salePrice"\s*:\s*([0-9]+\.[0-9]+)/gi,
+      /"regularPrice"\s*:\s*([0-9]+\.[0-9]+)/gi,
+      /"price"\s*:\s*([0-9]+\.[0-9]+)/gi,
+      /"customerPrice":\s*\{\s*"currentPrice":\s*\{\s*"value":\s*([0-9]+\.[0-9]+)/gi,
+      /"customerPrice":\s*\{\s*"currentPrice":\s*\{\s*"price":\s*([0-9]+\.[0-9]+)/gi,
+      /"formattedSalePrice"\s*:\s*"\$?([0-9]+(?:\.[0-9]{2})?)"/gi,
+      /"formattedPriceValue"\s*:\s*"\$?([0-9]+(?:\.[0-9]{2})?)"/gi,
+      /"priceWithPlan":\s*\{\s*"price":\s*([0-9]+\.[0-9]+)/gi,
+      /"priceAmount"\s*:\s*([0-9]+\.[0-9]+)/gi,
     ];
     for (const re of bbRegexes) {
-      const m = html.match(re);
-      if (m?.[1]) {
-        price = cleanPrice(m[1]);
-        if (price != null) break;
+      let m;
+      while ((m = re.exec(html)) !== null) {
+        pushCandidate(m[1]);
       }
     }
 
-    if (price == null) {
-      const bbText =
-        $('[data-testid="customer-price"]').text() ||
-        $('.priceView-hero-price').text() ||
-        $('.priceView-hero-price span[aria-hidden="true"]').text() ||
-        $('.priceView-customer-price').text() ||
-        $('.priceView-customer-price .sr-only').text() ||
-        $('[itemprop="price"]').attr('content');
-      price = cleanPrice(bbText);
+    const bbTextFields = [
+      $('[data-testid="customer-price"]').text(),
+      $('.priceView-hero-price').text(),
+      $('.priceView-hero-price span[aria-hidden="true"]').text(),
+      $('.priceView-customer-price').text(),
+      $('.priceView-customer-price .sr-only').text(),
+      $('[itemprop="price"]').attr('content'),
+    ];
+    bbTextFields.forEach(pushCandidate);
+
+    if (candidates.length > 0) {
+      price = Math.max(...candidates);
     }
   }
 
