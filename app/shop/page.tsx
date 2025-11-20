@@ -609,6 +609,11 @@ export default function ShopPage() {
                   );
                   const isBought = !!purchasedRow;
 
+                  if (isBought) {
+                    // Hide items already marked as bought by this user.
+                    return null;
+                  }
+
                   return (
                     <div
                       key={item.id}
@@ -671,7 +676,8 @@ export default function ShopPage() {
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'flex-start',
-                            gap: 8,
+                            gap: 10,
+                            flexWrap: 'wrap',
                           }}
                         >
                           <div
@@ -702,23 +708,33 @@ export default function ShopPage() {
                             >
                               For {ownerName}
                             </div>
-                          </div>
-                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                        {renderStars(item.priority)}
-                        {!funMode && price != null && (
+                            </div>
                           <div
                             style={{
-                              fontSize: 13,
-                              marginTop: 4,
-                              opacity: 0.95,
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
+                              textAlign: 'right',
+                              flexShrink: 0,
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'flex-end',
+                              minWidth: 90,
+                              gap: 2,
                             }}
                           >
-                            ${price.toFixed(2)}
-                          </div>
-                        )}
+                            {renderStars(item.priority)}
+                            {!funMode && price != null && (
+                              <div
+                                style={{
+                                  fontSize: 13,
+                                  marginTop: 2,
+                                  opacity: 0.95,
+                                  whiteSpace: 'nowrap',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                }}
+                              >
+                                ${price.toFixed(2)}
+                              </div>
+                            )}
                           </div>
                         </div>
                         {item.description && (
