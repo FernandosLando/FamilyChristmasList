@@ -580,6 +580,7 @@ export default function ShopPage() {
               background: 'rgba(15,23,42,0.96)',
               border: '1px solid rgba(148,163,184,0.5)',
               boxShadow: '0 24px 60px rgba(15,23,42,0.9)',
+              minWidth: 0,
             }}
           >
             <h2 style={{ margin: 0, marginBottom: 8, fontSize: 16 }}>Wishlist</h2>
@@ -618,6 +619,7 @@ export default function ShopPage() {
                         gap: 10,
                         alignItems: 'stretch',
                         background: 'rgba(15,23,42,0.98)',
+                        minWidth: 0,
                       }}
                     >
                       <div
@@ -695,20 +697,22 @@ export default function ShopPage() {
                               For {ownerName}
                             </div>
                           </div>
-                          <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                            {renderStars(item.priority)}
-                            {!funMode && price != null && (
-                              <div
-                                style={{
-                                  fontSize: 13,
-                                  marginTop: 4,
-                                  opacity: 0.95,
-                                  whiteSpace: 'nowrap',
-                                }}
-                              >
-                                ${price.toFixed(2)}
-                              </div>
-                            )}
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        {renderStars(item.priority)}
+                        {!funMode && price != null && (
+                          <div
+                            style={{
+                              fontSize: 13,
+                              marginTop: 4,
+                              opacity: 0.95,
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                            }}
+                          >
+                            ${price.toFixed(2)}
+                          </div>
+                        )}
                           </div>
                         </div>
                         {item.description && (
@@ -736,6 +740,8 @@ export default function ShopPage() {
                           alignItems: 'flex-end',
                           flexShrink: 0,
                           width: 112,
+                          minWidth: 112,
+                          maxWidth: 112,
                         }}
                       >
                         <button

@@ -99,6 +99,11 @@ function parseProduct(html: string, baseUrl: string) {
         $('#landingImage').attr('data-old-hires');
       if (amazonHiRes) imageUrl = amazonHiRes;
     }
+
+    if (!imageUrl) {
+      const hiResMatch = html.match(/"hiRes"\s*:\s*"([^"]+)"/);
+      if (hiResMatch?.[1]) imageUrl = hiResMatch[1];
+    }
   }
 
   if (!imageUrl) {
@@ -127,6 +132,33 @@ function parseProduct(html: string, baseUrl: string) {
       $('meta[property="og:price:amount"]').attr('content') ||
       $('meta[name="twitter:data1"]').attr('content');
     price = cleanPrice(metaPrice);
+  }
+
+  // Amazon-specific price blocks and embedded JSON (covers most store/locale variations).
+  if (price == null && hostname.includes('amazon.')) {
+    const amazonPriceText =
+      $('#corePriceDisplay_desktop_feature_div .a-offscreen').first().text() ||
+      $('#corePrice_feature_div .a-offscreen').first().text() ||
+      $('#priceblock_ourprice').text() ||
+      $('#priceblock_dealprice').text() ||
+      $('#priceblock_saleprice').text() ||
+      $('.a-price .a-offscreen').first().text();
+    price = cleanPrice(amazonPriceText);
+
+    if (price == null) {
+      const priceMatches = [
+        /"priceToPay":\{"rawPrice":"([^"]+)"/,
+        /"rawPrice":"([^"]+)"/,
+        /"displayPrice"\s*:\s*"([^"]+)"/,
+      ];
+      for (const re of priceMatches) {
+        const m = html.match(re);
+        if (m?.[1]) {
+          price = cleanPrice(m[1]);
+          if (price != null) break;
+        }
+      }
+    }
   }
 
   const extractPriceFromObject = (obj: any): number | null => {
