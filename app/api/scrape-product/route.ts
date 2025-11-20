@@ -204,6 +204,9 @@ function parseProduct(html: string, baseUrl: string) {
       $('.priceView-customer-price').text(),
       $('.priceView-customer-price .sr-only').text(),
       $('[itemprop="price"]').attr('content'),
+      // New Best Buy design price spans
+      $('.text-style-body-md-400').text(),
+      $('span.font-sans.text-default.text-style-body-md-400').text(),
     ];
     bbTextFields.forEach(pushCandidate);
 
