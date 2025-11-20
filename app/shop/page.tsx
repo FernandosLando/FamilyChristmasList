@@ -244,8 +244,8 @@ export default function ShopPage() {
         <span
           key={i}
           style={{
-            fontSize: 14,
-            marginRight: 2,
+            fontSize: 12,
+            marginRight: 1,
             background: filled
               ? 'linear-gradient(120deg,#facc15,#fb7185)'
               : 'linear-gradient(120deg,#9ca3af,#e5e7eb)',
@@ -303,7 +303,7 @@ export default function ShopPage() {
     <main
       style={{
         minHeight: '100vh',
-        padding: '1.5rem 1rem 2rem',
+        padding: '1.25rem 1rem 1.75rem',
         color: 'white',
         width: '100%',
       }}
@@ -336,7 +336,13 @@ export default function ShopPage() {
           }}
         >
           <div style={{ flex: 1, minWidth: 220 }}>
-            <h1 style={{ fontSize: '1.7rem', margin: 0 }}>
+            <h1
+              style={{
+                fontSize: 'clamp(1.5rem, 4vw + 0.4rem, 1.7rem)',
+                margin: '0 0 2px',
+                lineHeight: 1.2,
+              }}
+            >
               Zeller Family Christmas Lists 🎄
             </h1>
             <p style={{ fontSize: 13, opacity: 0.85, marginTop: 4 }}>
@@ -372,7 +378,14 @@ export default function ShopPage() {
               minWidth: 220,
             }}
           >
-            <div style={{ display: 'flex', gap: 8 }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: 8,
+                flexWrap: 'wrap',
+                justifyContent: 'flex-end',
+              }}
+            >
               <button
                 type="button"
                 onClick={() => router.push('/admin')}
@@ -761,9 +774,10 @@ export default function ShopPage() {
                           gap: 6,
                           alignItems: 'flex-end',
                           flexShrink: 0,
-                          width: 112,
-                          minWidth: 112,
-                          maxWidth: 112,
+                          width: '100%',
+                          minWidth: 0,
+                          maxWidth: 220,
+                          alignSelf: 'stretch',
                         }}
                       >
                         <button
