@@ -770,19 +770,16 @@ export default function ShopPage() {
 
                       <div
                         style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: 6,
-                          alignItems: 'flex-end',
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                          gap: 8,
+                          alignItems: 'center',
+                          justifyContent: 'flex-end',
                           flexShrink: 0,
                           width: '100%',
                           minWidth: 0,
                           maxWidth: 240,
                           alignSelf: 'stretch',
-                          display: 'grid',
-                          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-                          justifyContent: 'flex-end',
-                          gap: 8,
                         }}
                       >
                         <button
