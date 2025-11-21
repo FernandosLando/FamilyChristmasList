@@ -375,6 +375,7 @@ export async function POST(req: NextRequest) {
 
     let html: string | null = null;
     let sourceUsed: 'direct' | 'scraper' | null = null;
+    let baseForParse = url;
 
     // Try direct fetch first for speed and to let redirects (like a.co) resolve early.
     try {
@@ -385,9 +386,10 @@ export async function POST(req: NextRequest) {
       );
       if (directResp.ok) {
         const text = await directResp.text();
-        if (text && text.length > 500) {
+        if (text && text.length > 300) {
           html = text;
           sourceUsed = 'direct';
+          baseForParse = directResp.url || url;
         }
       }
     } catch (err) {
@@ -427,7 +429,40 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const parsed = parseProduct(html, url);
+    let parsed = parseProduct(html, baseForParse);
+
+    if (
+      sourceUsed === 'direct' &&
+      SCRAPER_API_KEY &&
+      (!parsed.imageUrl || parsed.price == null)
+    ) {
+      const scraperUrl = `https://api.scraperapi.com/?api_key=${encodeURIComponent(
+        SCRAPER_API_KEY
+      )}&render=true&url=${encodeURIComponent(url)}`;
+      try {
+        const scraperResp = await fetchWithTimeout(
+          scraperUrl,
+          { headers: commonHeaders, cache: 'no-store' },
+          RENDER_TIMEOUT
+        );
+        if (scraperResp.ok) {
+          const text = await scraperResp.text();
+          if (text && text.length > 500) {
+            const parsedScrape = parseProduct(text, url);
+            parsed = {
+              title: parsed.title || parsedScrape.title,
+              description: parsed.description || parsedScrape.description,
+              imageUrl: parsed.imageUrl || parsedScrape.imageUrl,
+              price: parsed.price ?? parsedScrape.price,
+            };
+            sourceUsed = 'scraper';
+          }
+        }
+      } catch (err) {
+        console.error('ScraperAPI fallback after direct parse failed:', err);
+      }
+    }
+
     return NextResponse.json({ ...parsed, source: sourceUsed });
   } catch (err) {
     console.error('Unexpected scrape error:', err);
